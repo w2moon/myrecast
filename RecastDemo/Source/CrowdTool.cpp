@@ -740,6 +740,39 @@ void CrowdToolState::setMoveTarget(const float* p, bool adjust)
 	}
 	else
 	{
+        if(true){
+            
+        
+        for (int i = 0; i < crowd->getAgentCount(); ++i)
+        {
+            const dtCrowdAgent* ag = crowd->getAgent(i);
+            if (!ag->active) continue;
+            dtPolyRef pStartRef = 0;
+            
+            float hitNormal[3];
+            float t;
+            bool found = false;
+            int pathCount;
+            float nearestPos[3];
+            navquery->findNearestPoly(&(ag->npos[0]), crowd->getQueryExtents(), crowd->getFilter(0), &pStartRef, nearestPos);
+            navquery->raycast(pStartRef, &(ag->npos[0]),p, crowd->getFilter(0), &t,hitNormal, &m_targetRef, &pathCount, 5);
+            if(t > 0 && t < 1){
+                dtVlerp(m_targetPos,&(ag->npos[0]),p,t);
+                navquery->findNearestPoly(m_targetPos, ext, filter, &m_targetRef, m_targetPos);
+                found = true;
+            }
+            if(!found){
+                navquery->findNearestPoly(p, ext, filter, &m_targetRef, m_targetPos);
+            }
+            crowd->requestMoveTarget(i, m_targetRef, m_targetPos);
+
+
+        }
+        }
+        else{
+            
+       
+        
 		navquery->findNearestPoly(p, ext, filter, &m_targetRef, m_targetPos);
 		
 		if (m_agentDebug.idx != -1)
@@ -757,6 +790,8 @@ void CrowdToolState::setMoveTarget(const float* p, bool adjust)
 				crowd->requestMoveTarget(i, m_targetRef, m_targetPos);
 			}
 		}
+             }
+         
 	}
 }
 
@@ -1017,7 +1052,19 @@ void CrowdTool::handleClick(const float* s, const float* p, bool shift)
 	}
 	else if (m_mode == TOOLMODE_MOVE_TARGET)
 	{
-		m_state->setMoveTarget(p, shift);
+        float p2[3];
+        p2[0] = p[0];
+        p2[1] = 0;
+        p2[2] = p[2];
+        const float* minBound = geom->getMeshBoundsMin();
+        const float* maxBound = geom->getMeshBoundsMax();
+        if(p2[2] < minBound[2]){
+            p2[2] = minBound[2];
+        }
+        if(p2[2]>maxBound[2]){
+            p2[2] = maxBound[2];
+        }
+		m_state->setMoveTarget(p2, shift);
 	}
 	else if (m_mode == TOOLMODE_SELECT)
 	{

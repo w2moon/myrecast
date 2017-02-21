@@ -1350,7 +1350,6 @@ bool Sample_TempObstacles::handleBuild()
 		if (tile->header)
 			navmeshMemUsage += tile->dataSize;
 	}
-	printf("navmeshMemUsage = %.1f kB", navmeshMemUsage/1024.0f);
 		
 	
 	if (m_tool)

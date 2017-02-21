@@ -98,6 +98,7 @@ class InputGeom
 	
 	bool loadMesh(class rcContext* ctx, const std::string& filepath);
 	bool loadGeomSet(class rcContext* ctx, const std::string& filepath);
+    bool loadMeshFromContents(class rcContext* ctx, const char* contents);
 public:
 	InputGeom();
 	~InputGeom();

@@ -70,6 +70,47 @@ static bool intersectSegmentTriangle(const float* sp, const float* sq,
 	return true;
 }
 
+bool InputGeom::loadMeshFromContents(rcContext* ctx, const char* contents)
+{
+    	if (m_mesh)
+        	{
+            		delete m_chunkyMesh;
+            		m_chunkyMesh = 0;
+            		delete m_mesh;
+            		m_mesh = 0;
+            	}
+    	m_offMeshConCount = 0;
+    	m_volumeCount = 0;
+    
+    	m_mesh = new rcMeshLoaderObj;
+    	if (!m_mesh)
+        	{
+            		ctx->log(RC_LOG_ERROR, "loadMesh: Out of memory 'm_mesh'.");
+            		return false;
+            	}
+    	if (!m_mesh->loadContents(contents))
+        	{
+            		ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Could not load from contents");
+            		return false;
+            	}
+    
+    	rcCalcBounds(m_mesh->getVerts(), m_mesh->getVertCount(), m_meshBMin, m_meshBMax);
+    
+    	m_chunkyMesh = new rcChunkyTriMesh;
+    	if (!m_chunkyMesh)
+        	{
+            		ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Out of memory 'm_chunkyMesh'.");
+            		return false;
+            	}
+    	if (!rcCreateChunkyTriMesh(m_mesh->getVerts(), m_mesh->getTris(), m_mesh->getTriCount(), 256, m_chunkyMesh))
+        	{
+            		ctx->log(RC_LOG_ERROR, "buildTiledNavigation: Failed to build chunky mesh.");
+            		return false;
+            	}		
+    
+    	return true;
+    }
+
 static char* parseRow(char* buf, char* bufEnd, char* row, int len)
 {
 	bool start = true;
